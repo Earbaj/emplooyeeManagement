@@ -25,7 +25,6 @@
 </body>
 </html> -->
 
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -66,6 +65,24 @@
     .btn {
       margin-right: 5px;
     }
+
+    .placeholder-container {
+      text-align: center;
+      padding: 50px 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .placeholder-container img {
+      width: 200px;
+      max-width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .placeholder-container h4 {
+      color: #888;
+    }
   </style>
 </head>
 <body class="container py-4">
@@ -81,37 +98,47 @@
     <a href="/add" class="btn btn-success">+ Add New Employee</a>
   </div>
 
-  <!-- Employee Table -->
-  <table class="table table-hover table-bordered shadow-sm bg-white rounded">
-    <thead class="table-light">
-      <tr>
-        <th scope="col">ID</th>
-        <th scope="col">Name</th>
-        <th scope="col">Email</th>
-        <th scope="col">Phone</th>
-        <th scope="col">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% employees.forEach(emp => { %>
+  <!-- Conditional Table or Placeholder -->
+  <% if (employees.length > 0) { %>
+    <!-- Employee Table -->
+    <table class="table table-hover table-bordered shadow-sm bg-white rounded">
+      <thead class="table-light">
         <tr>
-          <td><%= emp.id %></td>
-          <td><%= emp.name %></td>
-          <td><%= emp.email %></td>
-          <td><%= emp.phone %></td>
-          <td>
-            <a href="/edit/<%= emp.id %>" class="btn btn-sm btn-warning">Edit</a>
-            <a href="/delete/<%= emp.id %>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
-          </td>
+          <th scope="col">#ID</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">Actions</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% employees.forEach(emp => { %>
+          <tr>
+            <td><%= emp.id %></td>
+            <td><%= emp.name %></td>
+            <td><%= emp.email %></td>
+            <td><%= emp.phone %></td>
+            <td>
+              <a href="/edit/<%= emp.id %>" class="btn btn-sm btn-warning">Edit</a>
+              <a href="/delete/<%= emp.id %>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <!-- No Data Placeholder -->
+    <div class="placeholder-container">
+      <img src="https://cdn-icons-png.flaticon.com/512/7486/7486800.png" alt="No data">
+      <h4>No employees found. Click "Add New Employee" to get started.</h4>
+    </div>
+  <% } %>
 
   <!-- Footer -->
   <div class="footer">
-    <p>&copy; <%= new Date().getFullYear() %> Employee Management App | Built with Node.js + MySQL + Bootstrap | By Earbaj Md Saria</p>
+    <p>&copy; <%= new Date().getFullYear() %> Employee Management App | Built with Node.js + MySQL + Bootstrap</p>
   </div>
 
 </body>
 </html>
+
