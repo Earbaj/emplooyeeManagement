@@ -9,6 +9,8 @@ Date: 5-jul-2025
 // dependancy
 
 const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const db = require('./db');
 
@@ -19,8 +21,65 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
+app.use(session({
+  secret: 'mySecretKey',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Middleware to protect private routes
+function isAuthenticated(req, res, next) {
+  if (req.session.user) return next();
+  res.redirect('/login');
+}
+
+// ========== AUTH ROUTES ==========
+
+// Show Login Page
+app.get('/login', (req, res) => {
+  res.render('login', { message: '' });
+});
+
+// Handle Login
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err) throw err;
+    if (results.length === 0 || !(await bcrypt.compare(password, results[0].password))) {
+      return res.render('login', { message: 'Invalid email or password' });
+    }
+    req.session.user = results[0];
+    res.redirect('/');
+  });
+});
+
+// Show Registration Page
+app.get('/register', (req, res) => {
+  res.render('register', { message: '' });
+});
+
+// Handle Registration
+app.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  db.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword], (err) => {
+    if (err) {
+      return res.render('register', { message: 'Email already exists!' });
+    }
+    res.redirect('/login');
+  });
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
+
+
 // Home show Employee list
-app.get('/', (req,res) => {
+app.get('/',isAuthenticated, (req,res) => {
     db.query('select * from employee',(err, result)=>{
         if(err){
             console.error('Error fetching employee:', err);
